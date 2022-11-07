@@ -11,28 +11,31 @@
 // - classe (string) : guerrier, mage, voleur, archer, ....
 abstract class Personnage {
     protected string $name;
-    protected string $dateDeCreation;
+    protected DateTime $dateDeCreation;
     protected int $phyPower;
     protected int $magPower;
     protected int $armor;
     protected int $escape;
     protected int $life;
     protected int $mana;
+    protected ?Weapon $weapon;
+    protected ?Shield $shield;
     protected Bag $inventory;
+
     protected string $classe;
 
     public function __construct(
         string $name,
-        string $classe,
+        string $classe
     ){
         $this->name = $name;
-        $this->dateDeCreation = date('d-m-y h:i:s');
-        $this->phyPower = $phyPower;
-        $this->magPower = $magPower;
-        $this->armor = $phyPower/2;
-        $this->escape = $escape;
-        $this->life = $phyPower*2;
-        $this->mana = $magPower*2;
+        $this->dateDeCreation = new DateTime();
+        $this->phyPower = 10;
+        $this->magPower = 10;
+        $this->armor = 10/2;
+        $this->escape = 10;
+        $this->life = 10*2;
+        $this->mana = 10*2;
         $this->inventory = new Bag();
         $this->classe = $classe;
     }
@@ -51,24 +54,6 @@ abstract class Personnage {
     public function setName(string $name): Personnage
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDateDeCreation(): string
-    {
-        return $this->dateDeCreation;
-    }
-
-    /**
-     * @param string $dateDeCreation
-     */
-    public function setDateDeCreation(string $dateDeCreation): Personnage
-    {
-        $this->dateDeCreation = $dateDeCreation;
 
         return $this;
     }
@@ -219,6 +204,55 @@ abstract class Personnage {
     // TODO Personnage->useItem(Item $item)
     // TODO Personnage->equipItem(Item $item) -> if item.equipable === true
     // TODO Personnage->attackTarget(Personnage $target)
+    /**
+     * @return DateTime
+     */
+    public function getDateDeCreation(): DateTime
+    {
+        return $this->dateDeCreation;
+    }
+
+    /**
+     * @param DateTime $dateDeCreation
+     */
+    public function setDateDeCreation(DateTime $dateDeCreation): Personnage
+    {
+        $this->dateDeCreation = $dateDeCreation;
+
+        return $this;
+    }
+
+    /**
+     * @return Weapon|null
+     */
+    public function getWeapon(): ?Weapon
+    {
+        return $this->weapon;
+    }
+
+    /**
+     * @param Weapon|null $weapon
+     */
+    public function setWeapon(?Weapon $weapon): void
+    {
+        $this->weapon = $weapon;
+    }
+
+    /**
+     * @return Shield|null
+     */
+    public function getShield(): ?Shield
+    {
+        return $this->shield;
+    }
+
+    /**
+     * @param Shield|null $shield
+     */
+    public function setShield(?Shield $shield): void
+    {
+        $this->shield = $shield;
+    }
 }
 
 class Bag {
@@ -226,11 +260,12 @@ class Bag {
     protected string $shield;
 
 }
+
 class Warrior extends Personnage  {
 
-    public function __construct()
+    public function __construct(string $name)
     {
-        parent::__construct('Brutus', 'Warrior' );
+        parent::__construct($name, 'Warrior');
         $this->setPhyPower(random_int(20, 40));
         $this->setMagPower(random_int(0, 10));
         $this->setEscape(random_int(0, 100));
@@ -270,10 +305,9 @@ class Potion extends Items {
 // TODO - used (bool) (false)
 }
 
-// _______ inventory & stuff
-// - weapon (Weapon)  : equipped item
-// - shield (Shield) : equipped item
-// - bag (Bag)
+$brutus = new Warrior("Brutus");
+
+var_dump($brutus, '______________');
 
 
 // Item > Weapon > Sword > LongSword
