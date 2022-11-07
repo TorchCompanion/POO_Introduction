@@ -432,7 +432,7 @@ class FerrariF175 extends Car
 $stable1 = new Stable('Ferrari');
 $stable2= new Stable('Mercedes');
 $leclerc = new Driver('Charles Leclerc', $stable1);
-$sainz = new Driver('Carlos Sainz', $stable1);
+$sainz = new Driver('Carlos Sainz', $stable2);
 
 $ferrariPowerUnit = new Engine(6, 500, 0.6, 'Ferrari', '2022');
 
@@ -441,7 +441,7 @@ $ferarri = new FerrariF175($ferrariPowerUnit, $stable1, $leclerc);
 $ferarri->setDriver($leclerc)->setTyres(new Tyre(Tyre::TYPE_SOFT));
 $ferarri->addLap();
 
-$ferarri2 = new FerrariF175($ferrariPowerUnit,$stable2, $sainz);
+$ferarri2 = new FerrariF175($ferrariPowerUnit,$stable1, $sainz);
 $ferarri2->setDriver($sainz)->setTyres(new Tyre(Tyre::TYPE_SOFT));
 
 var_dump($ferarri, '___________', $ferarri2);
