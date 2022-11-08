@@ -342,6 +342,12 @@ class Bag {
      */
     protected array $item;
 
+    public function __construct(int $size)
+    {
+        $this->size = $size;
+        $this->item = [];
+    }
+
     public function addItem(Item $item) : Bag
     {
         if(count($this->item) < $this->size) {
@@ -349,21 +355,22 @@ class Bag {
         } else {
             throw new \Exception("Your bag is full");
         }
+        var_dump($this);
         return $this;
     }
     // TODO addItem(Item $item): Bag
 
-    public function removeItem(Item $item) : Bag
-    {
+//    public function removeItem(Item $item) : Bag
+//    {
+//
+//    }
+//    // TODO removeItem(Item $item): Bag
 
-    }
-    // TODO removeItem(Item $item): Bag
-
-    public function hasItem(Item $item) : bool
-    {
-
-    }
-    // TODO hasItem(Item $item): bool
+        public function hasItem(Item $item) : bool
+        {
+            return in_array($item, $this->item);
+        }
+        // TODO hasItem(Item $item): bool
 }
 
 class Warrior extends Character  {
@@ -371,9 +378,11 @@ class Warrior extends Character  {
     public function __construct(string $name)
     {
         parent::__construct($name, 'Warrior');
-        $this->setPhyPower(random_int(20, 40));
-        $this->setMagPower(random_int(0, 10));
-        $this->setEscape(random_int(0, 100));
+        $this->setLife(100);
+        $this->setMana(0);
+        $this->setPhyPower(random_int(60, 80));
+        $this->setMagPower(0);
+        $this->setEscape(random_int(1, 100));
     }
 
 }
@@ -381,18 +390,22 @@ class Mage extends Character {
     public function __construct(string $name)
     {
         parent::__construct($name, 'Mage');
-        $this->setPhyPower(random_int(0, 10));
-        $this->setMagPower(random_int(20, 40));
-        $this->setEscape(random_int(0, 100));
+        $this->setLife(60);
+        $this->setMana(100);
+        $this->setPhyPower(0);
+        $this->setMagPower(random_int(60, 80));
+        $this->setEscape(random_int(20, 100));
     }
 }
 class Rogue extends Character {
     public function __construct(string $name)
     {
         parent::__construct($name, 'Rogue');
-        $this->setPhyPower(random_int(10, 20));
-        $this->setMagPower(random_int(5, 15));
-        $this->setEscape(random_int(0, 50));
+        $this->setLife(80);
+        $this->setMana(0);
+        $this->setPhyPower(random_int(20, 50));
+        $this->setMagPower(0);
+        $this->setEscape(random_int(50, 100));
     }
 }
 abstract class Foe extends Character {
@@ -415,7 +428,7 @@ abstract class Item {
      */
     protected bool $equipable;
     /**
-     * @var string : Item type
+     * @var string : Item category
      */
     protected string $category;
     /**
@@ -434,7 +447,7 @@ abstract class Item {
         $this->description = $description;
         $this->equipable = $equipable;
         $this->type = $category;
-        $this->id = microtime() . random_int(1,999);
+        $this->id = microtime() . random_int(100,999);
     }
 // TODO - type (string) : weapon|shield|armor|potion|food|key|quest|misc
 
@@ -540,8 +553,17 @@ class Potion extends Item {
     public const POTION_HEALTH = "heal";
     public const POTION_MANA = "mana";
 
-    protected float $amount;
+    /**
+     * @var int : Potion power
+     */
+    protected int $amount;
+    /**
+     * @var string : Potion type
+     */
     protected string $type;
+    /**
+     * @var bool : If potion is used
+     */
     protected bool $used;
 
     public function __construct($name, $description, string $type = self::POTION_HEALTH)
@@ -549,25 +571,28 @@ class Potion extends Item {
         parent::__construct($name, $description, false, 'Potion');
         $this->type = $type;
         $this->used = false;
-        $this->amount = 0;
+        switch($type) {
+            case self::POTION_HEALTH:
+                $this->amount = random_int(20, 50);
+                break;
+            case self::POTION_MANA:
+                $this->amount = random_int(20, 50);
+                break;
+        }
     }
 
-// TODO - const TYPE_HEAL = 'heal', TYPE_MANA = 'mana'
-// TODO - amount (float)
-// TODO - type (string)(self::TYPE_HEAL|self::TYPE_MANA)
-// TODO - used (bool) (false)
     /**
-     * @return float
+     * @return int
      */
-    public function getAmount(): float
+    public function getAmount(): int
     {
         return $this->amount;
     }
 
     /**
-     * @param float $amount
+     * @param int $amount
      */
-    public function setAmount(float $amount): Potion
+    public function setAmount(int $amount): Potion
     {
         $this->amount = $amount;
 
@@ -625,9 +650,9 @@ $brutus->receiveDamage(50);
 $brutus->useItem($maxiHealthPotion);
 
 
-var_dump($brutus, '______________', $gandolfr, '______________', $saskue);
+var_dump($brutus);
 
-
+//'______________', $gandolfr, '______________', $saskue)
 // Item > Weapon > Sword > LongSword
 // Item > Weapon > Sword > GreatSword
 // Item > Weapon > Staff > FireStaff
