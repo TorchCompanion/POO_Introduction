@@ -90,6 +90,7 @@ abstract class Character
 
     /**
      * @param string $name
+     * @return Character
      */
     public function setName(string $name): Character
     {
@@ -108,6 +109,7 @@ abstract class Character
 
     /**
      * @param DateTime $creationDate
+     * @return Character
      */
     public function setCreationDate(DateTime $creationDate): Character
     {
@@ -126,6 +128,7 @@ abstract class Character
 
     /**
      * @param int $phyPower
+     * @return Character
      */
     public function setPhyPower(int $phyPower): Character
     {
@@ -144,6 +147,7 @@ abstract class Character
 
     /**
      * @param int $magPower
+     * @return Character
      */
     public function setMagPower(int $magPower): Character
     {
@@ -162,6 +166,7 @@ abstract class Character
 
     /**
      * @param int $armor
+     * @return Character
      */
     public function setArmor(int $armor): Character
     {
@@ -180,6 +185,7 @@ abstract class Character
 
     /**
      * @param int $escape
+     * @return Character
      */
     public function setEscape(int $escape): Character
     {
@@ -198,6 +204,7 @@ abstract class Character
 
     /**
      * @param int $life
+     * @return Character
      */
     public function setLife(int $life): Character
     {
@@ -216,6 +223,7 @@ abstract class Character
 
     /**
      * @param int $mana
+     * @return Character
      */
     public function setMana(int $mana): Character
     {
@@ -234,6 +242,7 @@ abstract class Character
 
     /**
      * @param Weapon|null $weapon
+     * @return Character
      */
     public function setWeapon(?Weapon $weapon): Character
     {
@@ -252,6 +261,7 @@ abstract class Character
 
     /**
      * @param Shield|null $shield
+     * @return Character
      */
     public function setShield(?Shield $shield): Character
     {
@@ -270,6 +280,7 @@ abstract class Character
 
     /**
      * @param Bag $inventory
+     * @return Character
      */
     public function setInventory(Bag $inventory): Character
     {
@@ -288,6 +299,7 @@ abstract class Character
 
     /**
      * @param string $classe
+     * @return Character
      */
     public function setClasse(string $classe): Character
     {
@@ -296,7 +308,7 @@ abstract class Character
         return $this;
     }
 
-    public function useItem(Item $item)
+    public function useItem(Item $item): void
     {
         if ($item instanceof Potion && $item->isUsed() === false) {
             // ====>
@@ -328,30 +340,42 @@ abstract class Character
         if (($item instanceof Shield) && $this->hasShield === true) {
             return true;
         }
-        // TODO item is Shield : ($item === Shield && Personnage.weapon.isTwoHanded === false)
-        // TODO item is weapon : ($item === Weapon) => si item.isTwoHanded === true => unequipItem($shield)
+        if($item instanceof Shield && $this->getWeapon()->isTwoHanded() === false) {
+            return true;
+        }
+        if($item instanceof Weapon && $item->isTwoHanded() === true) {
+            $this->unequipItem($this->isHasShield());
+        }
     }
 
-    public function equipItem(Item $item)
+    /**
+     * @throws Exception
+     */
+    public function equipItem(Item $item): void
     {
         if (!$this->getInventory()->hasItem($item)) {
-            throw new \Exception("You don't have this item in your inventory");
+            throw new \RuntimeException("You don't have this item in your inventory");
         }
 
         if ($this->canEquip($item) === false) {
-            throw new \Exception("You can't equip this item");
+            throw new \RuntimeException("You can't equip this item");
         }
         echo $this->getName() . " equip " . $item->getName() . PHP_EOL;
 
         // TODO - [public] equipItem (Item $item) => if item.equipable === true
     }
 
-    public function unequipItem()
+    public function unequipItem(Item $item): void
     {
-        // TODO - [public] unequipItem (Item $item) : deséquiper un item
+        if ($item instanceof Weapon) {
+            $this->setWeapon(null);
+        }
+        elseif ($item instanceof Shield) {
+            $this->setShield(null);
+        }
     }
 
-    public function receiveDamage(int $damage)
+    public function receiveDamage(int $damage): void
     {
         $this->life -= $damage;
         if ($this->life < 0) {
@@ -362,7 +386,7 @@ abstract class Character
         // TODO $target->receiveDamage($damage);
     }
 
-    public function attackTarget(Character $target)
+    public function attackTarget(Character $target): void
     {
         $damage = $this->phyPower;
         if ($this->weapon !== null) {
@@ -374,15 +398,18 @@ abstract class Character
 
     // TODO $damage = [calcul des dmg];
 
-    private function isDodged(): bool
-    {
-        // TODO - [private] isDodged() : calculer si le personnage a esquivé l'attaque mt_rand(0,  (escape - 100)) === (escape - 100)
-    }
+    // private function isDodged(): bool
+    // {
+    //     // TODO - [private] isDodged() : calculer si le personnage a esquivé l'attaque mt_rand(0,  (escape - 100)) === (escape - 100)
+    // }
 
     public function isAlive(): bool
     {
-        return $this->life > 0;
-        // TODO - [public] isAlive() : vérifier si le personnage est en vie
+        if($this->life <= 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -395,6 +422,7 @@ abstract class Character
 
     /**
      * @param array $equipableWeapon
+     * @return Character
      */
     public function setEquipableWeapon(array $equipableWeapon): Character
     {
@@ -413,6 +441,7 @@ abstract class Character
 
     /**
      * @param bool $hasShield
+     * @return Character
      */
     public function setHasShield(bool $hasShield): Character
     {
@@ -439,6 +468,9 @@ class Bag
         $this->item = [];
     }
 
+    /**
+     * @throws Exception
+     */
     public function addItem(Item $item): Bag
     {
 //        foreach ($this->item as $items) {
@@ -448,7 +480,7 @@ class Bag
         if (count($this->item) < $this->size) {
             $this->item[] = $item;
         } else {
-            throw new \Exception("Your bag is full");
+            throw new \RuntimeException("Your bag is full");
         }
         var_dump($this);
         return $this;
@@ -465,7 +497,7 @@ class Bag
 
     public function hasItem(Item $item): bool
     {
-        return in_array($item, $this->item);
+        return in_array($item, $this->item, true);
     }
     // TODO use ID to check
 }
@@ -473,6 +505,9 @@ class Bag
 class Warrior extends Character
 {
 
+    /**
+     * @throws Exception
+     */
     public function __construct(string $name)
     {
         parent::__construct($name, 'Warrior');
@@ -488,6 +523,9 @@ class Warrior extends Character
 
 class Mage extends Character
 {
+    /**
+     * @throws Exception
+     */
     public function __construct(string $name)
     {
         parent::__construct($name, 'Mage');
@@ -502,6 +540,9 @@ class Mage extends Character
 
 class Rogue extends Character
 {
+    /**
+     * @throws Exception
+     */
     public function __construct(string $name)
     {
         parent::__construct($name, 'Rogue');
@@ -516,10 +557,59 @@ class Rogue extends Character
 
 abstract class Foe extends Character
 {
-// TODO nom random, stats random
-// TODO Foe : bat|zombie|orc|gobelin|squelette
-// TODO each Foe override attackTarget(Personnage $target) => code pour calculer les dégats et l'utilisation de mana
+    public const RACE_GOBLIN = 'goblin';
+    public const RACE_ORC = 'orc';
+    public const RACE_BAT = 'bat';
+    public const RACE_SKELETON = 'skeleton';
+    public const RACE_ZOMBIE = 'zombie';
 
+    protected string $race;
+
+    public function __construct(string $name, string $race)
+    {
+        parent::__construct($name, 'Foe');
+        $this->setRace($race);
+    }
+
+
+// TODO nom random, stats random
+// TODO Foe : bat|zombie|orc|goblin|skeleton
+// TODO each Foe override attackTarget(Character $target) => code pour calculer les dégats et l'utilisation de mana
+    /**
+     * @return string
+     */
+    public function getRace(): string
+    {
+        return $this->race;
+    }
+
+    /**
+     * @param string $race
+     * @return Foe
+     */
+    public function setRace(string $race): Foe
+    {
+        $this->race = $race;
+
+        return $this;
+    }
+
+}
+class Goblin extends Foe
+{
+    /**
+     * @throws Exception
+     */
+    public function __construct(string $name)
+    {
+        parent::__construct($name, Foe::RACE_GOBLIN);
+        $this->setLife(random_int(20, 40));
+        $this->setMana(random_int(0, 20));
+        $this->setPhyPower(random_int(20, 50));
+        $this->setMagPower(random_int(10, 30));
+        $this->setEscape(random_int(50, 100));
+        $this->setEquipableWeapon([Weapon::CLASS_SWORD, Weapon::CLASS_DAGGER, Weapon::CLASS_BOW, Weapon::CLASS_FIST], Weapon::CLASS_STAFF, Weapon::CLASS_WAND);
+    }
 }
 
 abstract class Item
@@ -550,10 +640,13 @@ abstract class Item
      */
     protected string $category;
     /**
-     * @var string : Item id
+     * @var ?string : Item id
      */
     protected ?string $id;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(
         string $name,
         string $description,
@@ -564,7 +657,7 @@ abstract class Item
         $this->name = $name;
         $this->description = $description;
         $this->equipable = $equipable;
-        $this->type = $category;
+        $this->category = $category;
         $this->id = microtime() . random_int(100, 999);
     }
 
@@ -578,6 +671,7 @@ abstract class Item
 
     /**
      * @param string $name
+     * @return Item
      */
     public function setName(string $name): Item
     {
@@ -596,6 +690,7 @@ abstract class Item
 
     /**
      * @param string $description
+     * @return Item
      */
     public function setDescription(string $description): Item
     {
@@ -614,6 +709,7 @@ abstract class Item
 
     /**
      * @param bool $equipable
+     * @return Item
      */
     public function setEquipable(bool $equipable): Item
     {
@@ -632,6 +728,7 @@ abstract class Item
 
     /**
      * @param string $category
+     * @return Item
      */
     public function setCategory(string $category): Item
     {
@@ -650,6 +747,7 @@ abstract class Item
 
     /**
      * @param string|null $id
+     * @return Item
      */
     public function setId(?string $id): Item
     {
@@ -701,6 +799,7 @@ class Weapon extends Item
 
     /**
      * @param int $damage
+     * @return Weapon
      */
     public function setDamage(int $damage): Weapon
     {
@@ -719,6 +818,7 @@ class Weapon extends Item
 
     /**
      * @param bool $isTwoHanded
+     * @return Weapon
      */
     public function setIsTwoHanded(bool $isTwoHanded): Weapon
     {
@@ -737,6 +837,7 @@ class Weapon extends Item
 
     /**
      * @param string $weaponclass
+     * @return Weapon
      */
     public function setWeaponclass(string $weaponclass): Weapon
     {
@@ -874,24 +975,6 @@ class Shield extends Item
     }
 
     /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): Shield
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getArmor(): int
@@ -901,6 +984,7 @@ class Shield extends Item
 
     /**
      * @param int $armor
+     * @return Shield
      */
     public function setArmor(int $armor): Shield
     {
@@ -926,24 +1010,6 @@ class Armor extends Item
     }
 
     /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): Armor
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getArmor(): int
@@ -953,6 +1019,7 @@ class Armor extends Item
 
     /**
      * @param int $armor
+     * @return Armor
      */
     public function setArmor(int $armor): Armor
     {
@@ -998,6 +1065,7 @@ class Potion extends Item
 
     /**
      * @param int $amount
+     * @return Potion
      */
     public function setAmount(int $amount): Potion
     {
@@ -1016,6 +1084,7 @@ class Potion extends Item
 
     /**
      * @param string $type
+     * @return Potion
      */
     public function setType(string $type): Potion
     {
@@ -1034,6 +1103,7 @@ class Potion extends Item
 
     /**
      * @param bool $used
+     * @return Potion
      */
     public function setUsed(bool $used): Potion
     {
@@ -1079,6 +1149,7 @@ class Food extends Item
 
     /**
      * @param int $amount
+     * @return Food
      */
     public function setAmount(int $amount): Food
     {
@@ -1097,6 +1168,7 @@ class Food extends Item
 
     /**
      * @param string $type
+     * @return Food
      */
     public function setType(string $type): Food
     {
@@ -1115,6 +1187,7 @@ class Food extends Item
 
     /**
      * @param bool $used
+     * @return Food
      */
     public function setUsed(bool $used): Food
     {
@@ -1150,6 +1223,7 @@ class Key extends Item
 
     /**
      * @param string $type
+     * @return Key
      */
     public function setType(string $type): Key
     {
@@ -1184,6 +1258,7 @@ class QuestItem extends Item
 
     /**
      * @param string $type
+     * @return QuestItem
      */
     public function setType(string $type): QuestItem
     {
@@ -1204,7 +1279,7 @@ class Misc extends Item
 
     public function __construct($name, $description, string $type = self::MISC_ITEM)
     {
-        parent::__construct($name, $description, false, Item::CAT_MISC);
+        parent::__construct($name, $description, false);
         $this->type = $type;
     }
 
@@ -1218,6 +1293,7 @@ class Misc extends Item
 
     /**
      * @param string $type
+     * @return Misc
      */
     public function setType(string $type): Misc
     {
@@ -1227,24 +1303,30 @@ class Misc extends Item
     }
 }
 
-$axeOfDeath = new Axe('Axe of Death', 'Axe of Death', 30, true);
-$shieldOfLife = new Shield('Shield of Life', 'Shield of DLife', 20);
+try {
+    $axeOfDeath = new Axe('Axe of Death', 'Axe of Death', 30, true);
+} catch (Exception $e) {
+}
+try {
+    $shieldOfLife = new Shield('Shield of Life', 'Shield of DLife', 20);
+} catch (Exception $e) {
+}
 
 $maxiHealthPotion = new Potion('Maxi Health Potion', 'Turbo Health Potion Deluxe');
 
+$gobugobu = new Goblin("Gobugobu");
 $abrutus = new Warrior("Abrutus");
 $gandolfr = new Mage("Gandolfr");
 $saskue = new Rogue("Saskue");
 
-$abrutus->getInventory()->addItem($maxiHealthPotion);
+try {
+    $abrutus->getInventory()->addItem($maxiHealthPotion);
+} catch (Exception $e) {
+}
 // ...
 $abrutus->receiveDamage(50);
 // ...
 $abrutus->useItem($maxiHealthPotion);
 
 
-var_dump($abrutus, '______________', $gandolfr, '______________', $saskue);
-
-// Personnage->useItem(Item $item)
-// Personnage->equipItem(Item $item) -> if item.equipable === true
-// Personnage->attackTarget(Personnage $target)
+var_dump($abrutus, '______________', $gandolfr, '______________', $saskue, '______________', $gobugobu);
